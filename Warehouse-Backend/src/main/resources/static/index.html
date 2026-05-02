@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Warehouse Management System</title>
+    <style>
+        body { font-family: Arial; margin: 40px; background: #f4f4f4; }
+        .container { background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        input { padding: 10px; margin: 5px; width: 200px; border: 1px solid #ddd; border-radius: 5px; }
+        #output { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; white-space: pre-wrap; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏭 WMS Dashboard</h1>
+        
+        <h3>🔑 Login</h3>
+        <input type="text" id="username" placeholder="Username" value="admin">
+        <input type="password" id="password" placeholder="Password" value="admin123">
+        <button onclick="login()">Login</button>
+        <p id="token-display" style="color: green; font-size: 12px;"></p>
+        
+        <hr>
+        
+        <h3>📦 API Tests</h3>
+        <button onclick="getProducts()">Get All Products</button>
+        <button onclick="createOrder()">Create Order</button>
+        <button onclick="getOrder()">Get Order Status</button>
+        
+        <div id="output">Click a button to test the API...</div>
+    </div>
+
+    <script>
+        let token = '';
+        
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const response = await fetch(`http://localhost:8081/api/auth/login?username=${username}&password=${password}`);
+            const data = await response.json();
+            
+            token = data.token;
+            document.getElementById('token-display').innerText = 'Token: ' + token.substring(0, 50) + '...';
+            document.getElementById('output').innerText = '✅ Logged in as: ' + data.role;
+        }
+        
+        async function getProducts() {
+            const response = await fetch('http://localhost:8081/api/inventory', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+        }
+        
+        async function createOrder() {
+            const orderNum = 'ORD-' + Date.now();
+            const response = await fetch(`http://localhost:8081/api/orders/create?orderNumber=${orderNum}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            document.getElementById('output').innerText = '✅ Order Created:\n' + JSON.stringify(data, null, 2);
+        }
+        
+        async function getOrder() {
+            const response = await fetch('http://localhost:8081/api/orders/ORD-001', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
