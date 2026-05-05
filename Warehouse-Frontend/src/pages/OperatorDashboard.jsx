@@ -7,6 +7,7 @@ const OperatorDashboard = () => {
   const [activeTab, setActiveTab] = useState('scan');
   const [scanInput, setScanInput] = useState('');
   const [product, setProduct] = useState(null);
+  const [order, setOrder] = useState(null);
 
   const [sku, setSku] = useState('');
   const [name, setName] = useState('');
@@ -15,8 +16,8 @@ const OperatorDashboard = () => {
   const [quantity, setQuantity] = useState('');
 
   const [orderNumber, setOrderNumber] = useState('');
-  const [order, setOrder] = useState(null);
 
+  // ========== SCAN PRODUCT ==========
   const handleScan = async () => {
     if (!scanInput) return;
     try {
@@ -24,15 +25,25 @@ const OperatorDashboard = () => {
       setProduct(res.data);
       toast.success('Item found!');
     } catch (err) {
-      toast.error('Item not found');
-      setProduct(null);
+      // Try finding by barcode
+      try {
+        const res = await api.get(`/inventory/barcode/${scanInput}`);
+        setProduct(res.data);
+        toast.success('Item found by barcode!');
+      } catch (err2) {
+        toast.error('Item not found');
+        setProduct(null);
+      }
     }
   };
 
+  // ========== RECEIVE PRODUCT ==========
   const handleReceive = async (e) => {
     e.preventDefault();
     try {
-      await api.get('/inventory/receive', { params: { sku, name, barcode, binCode, quantity } });
+      await api.get('/inventory/receive', { 
+        params: { sku, name, barcode, binCode, quantity: parseInt(quantity) } 
+      });
       toast.success('Item received and putaway to bin!');
       setSku(''); setName(''); setBarcode(''); setBinCode(''); setQuantity('');
     } catch (err) {
@@ -40,8 +51,10 @@ const OperatorDashboard = () => {
     }
   };
 
+  // ========== PICK ORDER ==========
   const handlePick = async (e) => {
     e.preventDefault();
+    if (!orderNumber) return;
     try {
       const res = await api.get(`/orders/${orderNumber}`);
       setOrder(res.data);
@@ -72,7 +85,7 @@ const OperatorDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-2">🚚 Operator Console</h1>
-        <p className="text-blue-200 text-sm mb-8">Scan inbound items, putaway to bins, and pick for shipping</p>
+        <p className="text-blue-200 text-sm mb-8">Scan barcodes, receive items, and pick orders for shipping</p>
 
         <div className="flex gap-2 mb-8">
           {tabs.map(tab => (
@@ -88,8 +101,8 @@ const OperatorDashboard = () => {
         {activeTab === 'scan' && (
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 text-center">
             <FiCamera className="text-blue-300 mx-auto mb-4" size={50} />
-            <h2 className="text-xl font-bold text-white mb-2">Scan Barcode or SKU</h2>
-            <p className="text-blue-200 text-sm mb-4">Use barcode scanner or type SKU to find item location</p>
+            <h2 className="text-xl font-bold text-white mb-2">Scan Barcode or Enter SKU</h2>
+            <p className="text-blue-200 text-sm mb-4">Use barcode scanner or type SKU/Barcode to find item location</p>
             <div className="flex gap-2">
               <input type="text" placeholder="Scan or type SKU/Barcode..." value={scanInput}
                 onChange={e => setScanInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleScan()}
@@ -147,9 +160,9 @@ const OperatorDashboard = () => {
         {activeTab === 'pick' && (
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8">
             <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2"><FiTruck /> Pick for Shipping</h2>
-            <p className="text-blue-200 text-sm mb-6">Lookup order and update status for outbound shipping</p>
+            <p className="text-blue-200 text-sm mb-6">Scan order barcode or enter order number to process shipment</p>
             <form onSubmit={handlePick} className="space-y-4">
-              <input type="text" placeholder="Order Number (ORD-001)" value={orderNumber} onChange={e => setOrderNumber(e.target.value)}
+              <input type="text" placeholder="Scan or type Order Number (ORD-001)..." value={orderNumber} onChange={e => setOrderNumber(e.target.value)}
                 className="w-full p-4 bg-white/10 border border-white/20 rounded-xl text-white text-lg placeholder-blue-300/50 focus:outline-none" required />
               <button type="submit" className="w-full py-4 bg-orange-600 text-white font-bold rounded-xl text-lg">
                 📦 Lookup Order
@@ -160,6 +173,14 @@ const OperatorDashboard = () => {
               <div className="mt-6 p-6 bg-white/5 rounded-xl border border-white/10">
                 <h3 className="text-white font-bold text-lg mb-2">Order: {order.orderNumber}</h3>
                 <p className="text-blue-200 mb-4">Status: <span className={`font-bold ${order.status === 'SHIPPED' ? 'text-green-400' : 'text-yellow-400'}`}>{order.status}</span></p>
+
+                {/* Order QR Code */}
+                {order.barcodeImage && (
+                  <div className="flex justify-center mb-4 p-3 bg-white rounded-xl">
+                    <img src={`data:image/png;base64,${order.barcodeImage}`} alt="Order QR" className="w-40 h-40" />
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   {order.status === 'PENDING' && (
                     <button onClick={() => handleUpdateStatus('PICKING')} className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">Start Picking</button>
@@ -175,6 +196,13 @@ const OperatorDashboard = () => {
             )}
           </div>
         )}
+
+        {/* Bottom Help Text */}
+        <div className="mt-8 p-4 bg-white/5 rounded-xl border border-white/10 text-center">
+          <p className="text-blue-200 text-xs">
+            💡 <strong>Tip:</strong> Use a barcode scanner or type SKU/Barcode/Order Number to search
+          </p>
+        </div>
       </div>
     </div>
   );
