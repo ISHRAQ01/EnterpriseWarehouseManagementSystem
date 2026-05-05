@@ -42,7 +42,7 @@ public class WarehouseController {
 
     // ========== ZONE ==========
 
-    @GetMapping("/zones")
+    @GetMapping("/zone/all")
     public List<Zone> getAllZones() {
         return zoneRepository.findAll();
     }
@@ -61,6 +61,11 @@ public class WarehouseController {
 
     // ========== AISLE ==========
 
+    @GetMapping("/aisle/all")
+    public List<Aisle> getAllAisles() {
+        return aisleRepository.findAll();
+    }
+
     @GetMapping("/aisle/create")
     public ResponseEntity<Aisle> createAisle(
             @RequestParam String code,
@@ -73,6 +78,11 @@ public class WarehouseController {
     }
 
     // ========== BIN ==========
+
+    @GetMapping("/bin/all")
+    public List<Bin> getAllBins() {
+        return binRepository.findAll();
+    }
 
     @GetMapping("/bin/create")
     public ResponseEntity<Bin> createBin(
