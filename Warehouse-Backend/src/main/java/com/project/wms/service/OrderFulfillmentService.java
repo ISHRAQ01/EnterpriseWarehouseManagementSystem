@@ -7,32 +7,47 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class OrderFulfillmentService {
-    
+
     @Autowired
     private OrderRepository orderRepository;
-    
+
+    @Autowired
+    private BarcodeService barcodeService;
+
+    // GET ALL ORDERS with barcode
+    public List<Order> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        for (Order o : orders) {
+            o.setBarcodeImage(barcodeService.generateOrderBarcode(o.getOrderNumber()));
+        }
+        return orders;
+    }
+
     // Update order status with validation
     @Transactional
     public Order updateOrderStatus(String orderNumber, OrderStatus newStatus) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
-            .orElseThrow(() -> new RuntimeException("Order not found: " + orderNumber));
-        
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderNumber));
+
         validateStatusTransition(order.getStatus(), newStatus);
-        
+
         order.setStatus(newStatus);
         order.setLastUpdated(LocalDateTime.now());
-        return orderRepository.save(order);
+        order = orderRepository.save(order);
+        order.setBarcodeImage(barcodeService.generateOrderBarcode(order.getOrderNumber()));
+        return order;
     }
-    
+
     // Validate order status transitions
     private void validateStatusTransition(OrderStatus current, OrderStatus next) {
         if (current == next) {
-            return; // Same status is okay
+            return;
         }
-        
+
         switch (current) {
             case PENDING:
                 if (next != OrderStatus.PICKING && next != OrderStatus.PACKED) {
@@ -55,17 +70,21 @@ public class OrderFulfillmentService {
                 throw new IllegalStateException("Invalid status: " + current);
         }
     }
-    
-    // Create new order
+
+    // Create new order with barcode
     @Transactional
     public Order createOrder(String orderNumber) {
         Order order = new Order(orderNumber);
-        return orderRepository.save(order);
+        order = orderRepository.save(order);
+        order.setBarcodeImage(barcodeService.generateOrderBarcode(orderNumber));
+        return order;
     }
-    
-    // Get order by order number
+
+    // Get order by order number with barcode
     public Order getOrder(String orderNumber) {
-        return orderRepository.findByOrderNumber(orderNumber)
-            .orElseThrow(() -> new RuntimeException("Order not found: " + orderNumber));
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderNumber));
+        order.setBarcodeImage(barcodeService.generateOrderBarcode(orderNumber));
+        return order;
     }
 }

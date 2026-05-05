@@ -3,9 +3,11 @@ package com.project.wms.model;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+
 @Table(name = "bins")
 public class Bin {
 
