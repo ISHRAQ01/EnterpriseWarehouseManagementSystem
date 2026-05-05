@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fi';
 
 // ============================================
-// DUMMY DATA (Backend Connect ஆகும் வரை)
+// DUMMY DATA 
 // ============================================
 const stockData = [
   { productName: 'Product A', quantity: 120 },
