@@ -3,7 +3,7 @@
 [![Java Version](https://img.shields.io/badge/Java-17%2B-blue.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 [![Spring Boot Version](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15%2B-blue.svg)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 
 ## 📋 Executive Summary
 
