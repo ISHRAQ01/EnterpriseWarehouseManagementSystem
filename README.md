@@ -58,30 +58,11 @@ PENDING → PICKING → PACKED → SHIPPED
 - **Maven 3.8+**
 - **PostgreSQL 15+**
 - **Git** (for cloning)
-
-## 🚀 Getting Started
-
-```bash
-git clone https://github.com/yourusername/warehouse-management-system.git
-cd warehouse-management-system
-
+  
 🔒 Security Implementation
 1. JWT-based authentication with 24-hour expiration
 2. Role-based access control (ADMIN, OPERATOR, VIEWER)
-
-🤝 Contributing
-Fork the repository
-
-Create your feature branch (git checkout -b feature/amazing-feature)
-
-Commit your changes (git commit -m 'Add amazing feature')
-
-Push to the branch (git push origin feature/amazing-feature)
-
-Open a Pull Request
-
-
-
+   
 📧 Contact
 For questions or support, please contact:
 
@@ -95,3 +76,22 @@ Spring Boot team for excellent documentation
 PostgreSQL community for robust database solutions
 
 All contributors who participate in this project
+
+## 🚀 Getting Started
+
+```bash
+git clone https://github.com/yourusername/warehouse-management-system.git
+cd warehouse-management-system
+
+🤝 Contributing
+Fork the repository
+
+Create your feature branch (git checkout -b feature/amazing-feature)
+
+Commit your changes (git commit -m 'Add amazing feature')
+
+Push to the branch (git push origin feature/amazing-feature)
+
+Open a Pull Request
+
+
