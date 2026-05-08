@@ -29,3 +29,71 @@ This project delivers a robust, cloud-based **Warehouse Management System (WMS)*
 
 ### 1. Hierarchical Inventory Catalog
 Database schema managing physical relationships:
+Warehouses → Zones → Aisles → Bins
+
+
+### 2. Receiving & Put-away Engine
+- Logs incoming shipments
+- Algorithmically assigns optimal storage bin based on real-time capacity
+
+### 3. Order Fulfilment API
+State machine managing order lifecycle:
+PENDING → PICKING → PACKED → SHIPPED
+
+
+## 🏗️ Architecture & Technology Stack
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Backend** | Java 17+, Spring Boot 3.x | Production-ready enterprise framework |
+| **Data Access** | Spring Data JPA / Hibernate | ORM with SQL injection prevention |
+| **Database** | PostgreSQL 15+ | ACID-compliant relational database |
+| **Security** | Spring Security, JWT | Role-based access control (ADMIN/OPERATOR) |
+| **Frontend** | React.js | Dynamic component-based UI |
+| **Testing** | JUnit 5, Mockito | Unit & integration testing |
+
+## 📦 Prerequisites
+
+- **Java 17** or higher
+- **Maven 3.8+**
+- **PostgreSQL 15+**
+- **Git** (for cloning)
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/warehouse-management-system.git
+cd warehouse-management-system
+
+🔒 Security Implementation
+1. JWT-based authentication with 24-hour expiration
+2. Role-based access control (ADMIN, OPERATOR, VIEWER)
+
+🤝 Contributing
+Fork the repository
+
+Create your feature branch (git checkout -b feature/amazing-feature)
+
+Commit your changes (git commit -m 'Add amazing feature')
+
+Push to the branch (git push origin feature/amazing-feature)
+
+Open a Pull Request
+
+
+
+📧 Contact
+For questions or support, please contact:
+
+Project Lead: [ishraq0641@gmail.com]
+
+
+
+🙏 Acknowledgments
+Spring Boot team for excellent documentation
+
+PostgreSQL community for robust database solutions
+
+All contributors who participate in this project
