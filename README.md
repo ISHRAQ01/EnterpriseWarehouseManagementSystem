@@ -1,3 +1,4 @@
+Java Spring Boot API & PostgreSQL Warehouse Management
 1. Executive Summary
 The exponential growth of e-commerce has placed immense pressure on traditional warehouse operations, which often rely on fragmented, manual processes. These outdated methods lead to critical issues such as inaccurate inventory synchronization, misplaced stock, inefficient worker routing, costly stockouts, and delayed order fulfilment.
 This project involves architecting and developing a robust, cloud-based Warehouse Management System (WMS). The platform is designed to be the digital backbone for mid-sized logistics companies transitioning to automated supply chain management. It will automate core warehouse operations by providing real-time inventory tracking, optimized receiving and put away logic, and efficient order-picking workflows.
@@ -28,3 +29,4 @@ The system follows a modern, scalable enterprise architecture:
 | **API Security** | Spring Security, JWT | Secures REST APIs with JSON Web Tokens, implementing role-based access control for 'ADMIN' and 'OPERATOR' roles. |
 | **Frontend Application** | React.js | Consumes the backend REST APIs to provide a dynamic, component-based user interface. Communication is handled via Axios or Fetch. |
 | **Testing** | JUnit 5, Mockito | Used to write comprehensive unit tests for core inventory services, ensuring reliability and code quality. |
+**
