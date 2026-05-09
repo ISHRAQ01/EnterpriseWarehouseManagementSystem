@@ -76,7 +76,7 @@ Spring Boot team for excellent documentation
 PostgreSQL community for robust database solutions
 
 All contributors who participate in this project
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 🚀 Getting Started
 
 ```bash
