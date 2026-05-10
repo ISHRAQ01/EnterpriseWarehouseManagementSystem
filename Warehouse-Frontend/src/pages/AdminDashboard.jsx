@@ -216,6 +216,7 @@ const AdminDashboard = ({ tab: propTab }) => {
       </div>
     </div>
   );
+  <h2></h2>
 };
 
 export default AdminDashboard;
