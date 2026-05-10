@@ -14,7 +14,10 @@ export const AuthProvider = ({ children }) => {
         const decoded = jwtDecode(token);
         const currentTime = Date.now() / 1000;
         if (decoded.exp > currentTime) {
-          setUser({ username: decoded.sub, role: decoded.role });
+          setUser({
+            username: decoded.sub,
+            role: decoded.role,
+          });
         } else {
           localStorage.removeItem('warehouseToken');
         }
@@ -25,9 +28,13 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (token, role) => {
+  const login = (token) => {
     localStorage.setItem('warehouseToken', token);
-    setUser({ username: jwtDecode(token).sub, role: role });
+    const decoded = jwtDecode(token);
+    setUser({
+      username: decoded.sub,
+      role: decoded.role,
+    });
   };
 
   const logout = () => {
@@ -35,8 +42,8 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const isAdmin = () => user?.role === 'ADMIN' || user?.role === 'MANAGER';
-  const isOperator = () => user?.role === 'OPERATOR' || user?.role === 'DELIVERY';
+  const isAdmin = () => user?.role === 'ROLE_ADMIN';
+  const isOperator = () => user?.role === 'ROLE_OPERATOR';
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isAdmin, isOperator, loading }}>
@@ -47,6 +54,8 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
   return context;
 };
