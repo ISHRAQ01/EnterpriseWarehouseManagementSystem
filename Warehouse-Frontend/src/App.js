@@ -9,8 +9,9 @@ import InventoryPage from './pages/InventoryPage';
 import OrdersPage from './pages/OrdersPage';
 import ReceivingPage from './pages/ReceivingPage';
 import WarehousePage from './pages/WarehousePage';
+import AdminDashboard from './pages/AdminDashboard';
+import OperatorDashboard from './pages/OperatorDashboard';
 
-// Layout
 const Layout = () => (
   <div className="flex">
     <Sidebar />
@@ -29,13 +30,19 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/operator" element={<OperatorDashboard />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/receiving" element={<ReceivingPage />} />
             <Route path="/warehouses" element={<WarehousePage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/warehouse" element={<AdminDashboard tab="warehouse" />} />
+            <Route path="/admin/zone" element={<AdminDashboard tab="zone" />} />
+            <Route path="/admin/aisle" element={<AdminDashboard tab="aisle" />} />
+            <Route path="/admin/bin" element={<AdminDashboard tab="bin" />} />
           </Route>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
@@ -43,6 +50,3 @@ function App() {
 }
 
 export default App;
-// Day 2: Tailwind CSS configuration
-// Day 3: Created 3D Login Page with Glassmorphism Effect and Dashboard Layout with Sidebar Navigation
- 
