@@ -4,6 +4,7 @@ import com.project.wms.model.*;
 import com.project.wms.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,14 +31,51 @@ public class WarehouseController {
     public List<Warehouse> getAllWarehouses() {
         return warehouseRepository.findAll();
     }
+    @GetMapping("/{id}")
+    @Transactional (readOnly = true)
+    public ResponseEntity<Warehouse> getWarehouseDetail(@PathVariable Long id) {
+        Warehouse wh = warehouseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        // Force initialization of lazy collections
+        wh.getZones().forEach(z -> {
+            z.getAisles().forEach(a -> a.getBins().size());
+            z.getAisles().size();
+        });
+        return ResponseEntity.ok(wh);
+    }
 
     @GetMapping("/create")
+    @Transactional
     public ResponseEntity<Warehouse> createWarehouse(
             @RequestParam String code,
             @RequestParam String name,
             @RequestParam String address) {
         Warehouse w = new Warehouse(code, name, address);
-        return ResponseEntity.ok(warehouseRepository.save(w));
+        w = warehouseRepository.save(w);
+        return ResponseEntity.ok(w);
+    }
+    @GetMapping("/{id}/create-default-zones")
+    @Transactional
+    public ResponseEntity<?> createDefaultZones(@PathVariable Long id) {
+        Warehouse wh = warehouseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+
+        if (wh.getZones() != null && !wh.getZones().isEmpty()) {
+            return ResponseEntity.badRequest().body("Zones already exist");
+        }
+
+        String[][] defaults = {
+                {"ZONE-STORE", "STORAGE"},
+                {"ZONE-PICK", "PICKING"},
+                {"ZONE-SHIP", "SHIPPING"},
+                {"ZONE-RECV", "RECEIVING"}
+        };
+        for (String[] z : defaults) {
+            Zone zone = new Zone(z[0], z[1]);
+            zone.setWarehouse(wh);
+            zoneRepository.save(zone);
+        }
+        return ResponseEntity.ok().build();
     }
 
     // ========== ZONE ==========
