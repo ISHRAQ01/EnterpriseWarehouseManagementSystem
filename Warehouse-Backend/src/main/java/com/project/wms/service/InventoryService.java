@@ -42,56 +42,49 @@ public class InventoryService {
     @Transactional
     public Product receiveProduct(String sku, String name, String barcode,
                                   String binCode, int quantity) {
-        // Check if SKU already exists
-        Optional<Product> existing = productRepository.findBySku(sku);
+        // Check if SKU already exists in THIS bin
+        Optional<Product> existing = productRepository.findBySkuAndBinCode(sku, binCode);
         if (existing.isPresent()) {
             Product p = existing.get();
-            p.setQuantity(p.getQuantity() + quantity);
+            Bin bin = p.getBin();
+            double capacity = bin.getCapacity() != null ? bin.getCapacity() : 100;
+            int newQty = p.getQuantity() + quantity;
+
+            // Cap at bin capacity
+            if (newQty > capacity) {
+                p.setQuantity((int) capacity);
+            } else {
+                p.setQuantity(newQty);
+            }
             return productRepository.save(p);
         }
 
-        // Find or create Bin
+        // Find bin - if bin doesn't exist, create it
         Bin bin = binRepository.findByBinCode(binCode)
                 .orElseGet(() -> {
-                    // Auto-create Aisle for this bin
-                    Aisle aisle = aisleRepository.findByAisleCode("AUTO-AISLE")
-                            .orElseGet(() -> {
-                                // Auto-create Zone for this aisle
-                                Zone zone = zoneRepository.findByZoneCode("AUTO-ZONE")
-                                        .orElseGet(() -> {
-                                            // Auto-create Warehouse for this zone
-                                            Warehouse wh = warehouseRepository.findByWarehouseCode("AUTO-WH")
-                                                    .orElseGet(() -> {
-                                                        Warehouse newWh = new Warehouse("AUTO-WH", "Auto Warehouse", "Auto-generated");
-                                                        return warehouseRepository.save(newWh);
-                                                    });
-                                            Zone newZone = new Zone("AUTO-ZONE", "STORAGE");
-                                            newZone.setWarehouse(wh);
-                                            return zoneRepository.save(newZone);
-                                        });
-                                Aisle newAisle = new Aisle("AUTO-AISLE");
-                                newAisle.setZone(zone);
-                                return aisleRepository.save(newAisle);
-                            });
                     Bin newBin = new Bin(binCode, 100.0);
-                    newBin.setAisle(aisle);
                     return binRepository.save(newBin);
                 });
 
-        Product product = new Product(sku, name, quantity);
+        double capacity = bin.getCapacity() != null ? bin.getCapacity() : 100;
+        int cappedQty = Math.min(quantity, (int) capacity);
+
+        Product product = new Product(sku, name, cappedQty);
         product.setBarcode(barcode);
         product.setBin(bin);
         return productRepository.save(product);
     }
-
     @Transactional
     public Product updateInventory(String sku, int quantityChange) {
         Product product = productRepository.findBySku(sku)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + sku));
+
         int newQuantity = product.getQuantity() + quantityChange;
+
         if (newQuantity < 0) {
             throw new RuntimeException("Insufficient inventory for SKU: " + sku);
         }
+
         product.setQuantity(newQuantity);
         return productRepository.save(product);
     }

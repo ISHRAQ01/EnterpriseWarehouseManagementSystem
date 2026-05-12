@@ -75,7 +75,7 @@ const DashboardPage = () => {
       setStats({
         totalProducts: prods.length,
         totalItems: prods.reduce((sum, p) => sum + (p.quantity || 0), 0),
-        lowStock: prods.filter(p => p.quantity > 0 && p.quantity < 10).length,
+        lowStock: prods.filter(p => p.quantity > 0 && p.quantity < 30).length,
         outOfStock: prods.filter(p => p.quantity === 0).length,
         pendingOrders: ords.filter(o => o.status === 'PENDING').length,
         shippedOrders: ords.filter(o => o.status === 'SHIPPED').length,

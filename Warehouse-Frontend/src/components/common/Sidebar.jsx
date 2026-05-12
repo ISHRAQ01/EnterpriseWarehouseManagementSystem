@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   FiGrid, FiPackage, FiTruck, FiShoppingCart,
-  FiDatabase, FiLogOut, FiUser, FiSettings,
-  FiHome, FiLayers, FiBox, FiChevronDown, FiChevronUp
+  FiDatabase, FiLogOut, FiUser
 } from 'react-icons/fi';
 
 const Sidebar = () => {
   const { user, logout, isAdmin, isOperator } = useAuth();
   const navigate = useNavigate();
-  const [setupOpen, setSetupOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -18,19 +16,12 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { path: '/dashboard', icon: <FiGrid size={20} />, label: 'Dashboard', roles: ['ADMIN', 'MANAGER'] },
+    { path: '/dashboard', icon: <FiGrid size={20} />, label: 'Dashboard', roles: ['MANAGER'] },
+    { path: '/warehouses', icon: <FiDatabase size={20} />, label: 'Warehouses', roles: ['MANAGER'] },
     { path: '/operator', icon: <FiGrid size={20} />, label: 'Dashboard', roles: ['OPERATOR'] },
-    { path: '/warehouses', icon: <FiDatabase size={20} />, label: 'Warehouses', roles: ['ADMIN', 'MANAGER'] },
     { path: '/inventory', icon: <FiPackage size={20} />, label: 'Inventory', roles: ['MANAGER'] },
     { path: '/receiving', icon: <FiTruck size={20} />, label: 'Receiving', roles: ['MANAGER'] },
     { path: '/orders', icon: <FiShoppingCart size={20} />, label: 'Orders', roles: ['MANAGER'] },
-  ];
-
-  const setupItems = [
-    { path: '/admin/warehouse', icon: <FiHome size={16} />, label: 'Add Warehouse' },
-    { path: '/admin/zone', icon: <FiGrid size={16} />, label: 'Add Zone' },
-    { path: '/admin/aisle', icon: <FiLayers size={16} />, label: 'Add Aisle' },
-    { path: '/admin/bin', icon: <FiBox size={16} />, label: 'Add Bin' },
   ];
 
   return (
@@ -57,7 +48,7 @@ const Sidebar = () => {
             <span className={`text-xs px-2 py-0.5 rounded-full ${
               isAdmin() ? 'bg-purple-500/20 text-purple-300' : isOperator() ? 'bg-green-500/20 text-green-300' : 'bg-blue-500/20 text-blue-300'
             }`}>
-              {isAdmin() ? 'Admin' : isOperator() ? 'Operator' : 'Manager'}
+              {isAdmin() ? 'Manager' : isOperator() ? 'Operator' : 'Manager'}
             </span>
           </div>
         </div>
@@ -76,28 +67,6 @@ const Sidebar = () => {
               </li>
             );
           })}
-
-          {user?.role === 'ADMIN' && (
-            <li>
-              <button onClick={() => setSetupOpen(!setupOpen)}
-                className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
-                <div className="flex items-center gap-3"><FiSettings size={20} /><span className="text-sm font-medium">Warehouse Setup</span></div>
-                {setupOpen ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
-              </button>
-              {setupOpen && (
-                <ul className="mt-1 ml-8 space-y-1">
-                  {setupItems.map((item) => (
-                    <li key={item.path}>
-                      <NavLink to={item.path} className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${isActive ? 'bg-blue-600/50 text-white' : 'text-slate-500 hover:text-white hover:bg-slate-700'}`}>
-                        {item.icon}<span>{item.label}</span>
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          )}
         </ul>
       </nav>
 

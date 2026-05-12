@@ -15,7 +15,6 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // GET login (for browser testing)
     @GetMapping("/login")
     public ResponseEntity<Map<String, String>> loginGet(
             @RequestParam String username,
@@ -23,7 +22,6 @@ public class AuthController {
         return authenticate(username, password);
     }
 
-    // POST login (for React frontend)
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginPost(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
@@ -34,13 +32,7 @@ public class AuthController {
     private ResponseEntity<Map<String, String>> authenticate(String username, String password) {
         Map<String, String> response = new HashMap<>();
 
-        if ("admin".equals(username) && "admin123".equals(password)) {
-            String token = jwtUtil.generateToken(username, "ROLE_ADMIN");
-            response.put("token", token);
-            response.put("role", "ADMIN");
-            return ResponseEntity.ok(response);
-        }
-        else if ("manager".equals(username) && "manager123".equals(password)) {
+        if ("manager".equals(username) && "manager123".equals(password)) {
             String token = jwtUtil.generateToken(username, "ROLE_ADMIN");
             response.put("token", token);
             response.put("role", "MANAGER");

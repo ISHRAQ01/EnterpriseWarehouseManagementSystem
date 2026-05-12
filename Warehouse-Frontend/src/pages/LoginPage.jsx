@@ -98,11 +98,7 @@ const LoginPage = () => {
 
           <div className="mt-8 p-4 bg-white/5 rounded-xl border border-white/10">
             <p className="text-xs text-blue-300 font-medium mb-3 uppercase tracking-wider">Demo Credentials</p>
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div onClick={() => fillCredentials('admin', 'admin123')} className="p-2 bg-white/10 rounded-lg cursor-pointer hover:bg-white/20">
-                <span className="text-purple-300 font-bold">Admin</span>
-                <p className="text-white/70 mt-1">admin / admin123</p>
-              </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <div onClick={() => fillCredentials('manager', 'manager123')} className="p-2 bg-white/10 rounded-lg cursor-pointer hover:bg-white/20">
                 <span className="text-blue-300 font-bold">Manager</span>
                 <p className="text-white/70 mt-1">manager / manager123</p>
