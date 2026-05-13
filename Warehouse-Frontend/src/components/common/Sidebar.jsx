@@ -3,7 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   FiGrid, FiPackage, FiTruck, FiShoppingCart,
-  FiDatabase, FiLogOut, FiUser
+  FiDatabase, FiLogOut, FiUser,
+  FiSearch
 } from 'react-icons/fi';
 
 const Sidebar = () => {
@@ -16,13 +17,13 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { path: '/dashboard', icon: <FiGrid size={20} />, label: 'Dashboard', roles: ['MANAGER'] },
+    { path: '/dashboard', icon: <FiGrid size={20} />, label: 'Dashboard', roles: ['MANAGER', 'OPERATOR'] },
     { path: '/warehouses', icon: <FiDatabase size={20} />, label: 'Warehouses', roles: ['MANAGER'] },
-    { path: '/operator', icon: <FiGrid size={20} />, label: 'Dashboard', roles: ['OPERATOR'] },
-    { path: '/inventory', icon: <FiPackage size={20} />, label: 'Inventory', roles: ['MANAGER'] },
-    { path: '/receiving', icon: <FiTruck size={20} />, label: 'Receiving', roles: ['MANAGER'] },
-    { path: '/orders', icon: <FiShoppingCart size={20} />, label: 'Orders', roles: ['MANAGER'] },
-  ];
+    { path: '/inventory', icon: <FiPackage size={20} />, label: 'Inventory', roles: ['MANAGER', 'OPERATOR'] },
+    { path: '/receiving', icon: <FiTruck size={20} />, label: 'Shipment', roles: ['MANAGER', 'OPERATOR'] },
+    { path: '/orders', icon: <FiShoppingCart size={20} />, label: 'Orders', roles: ['MANAGER', 'OPERATOR'] },
+    { path: '/Scan',icon:<FiSearch size={20}/>,label:'ScanItem',roles:['MANAGER','OPERATOR']},
+];
 
   return (
     <aside className="w-64 bg-slate-800 min-h-screen flex flex-col">
