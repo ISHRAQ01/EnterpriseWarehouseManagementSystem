@@ -12,8 +12,7 @@ import {
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
 const StatCard = ({ title, value, icon, color, bgColor, trend, trendValue }) => (
-  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-    <div className="flex items-start justify-between">
+<div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">    <div className="flex items-start justify-between">
       <div>
         <p className="text-gray-500 text-sm font-medium">{title}</p>
         <p className="text-3xl font-bold text-gray-800 mt-2">{value}</p>

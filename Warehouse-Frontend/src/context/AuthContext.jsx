@@ -14,7 +14,10 @@ export const AuthProvider = ({ children }) => {
         const decoded = jwtDecode(token);
         const currentTime = Date.now() / 1000;
         if (decoded.exp > currentTime) {
-          setUser({ username: decoded.sub, role: decoded.role });
+          const jwtRole = decoded.role || '';
+          const mappedRole = jwtRole.includes('OPERATOR') ? 'OPERATOR' : 
+                             jwtRole.includes('MANAGER') ? 'MANAGER' : jwtRole;
+          setUser({ username: decoded.sub, role: mappedRole });
         } else {
           localStorage.removeItem('warehouseToken');
         }

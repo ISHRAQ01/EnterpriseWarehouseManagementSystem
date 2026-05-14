@@ -10,7 +10,7 @@ import OrdersPage from './pages/OrdersPage';
 import ReceivingPage from './pages/ReceivingPage';
 import WarehousePage from './pages/WarehousePage';
 import AdminDashboard from './pages/AdminDashboard';
-import OperatorDashboard from './pages/OperatorDashboard';
+import ScanItem from './pages/ScanItem';
 
 const Layout = () => (
   <div className="flex">
@@ -30,7 +30,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/operator" element={<OperatorDashboard />} />
+            <Route path="/operator" element={<DashboardPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/receiving" element={<ReceivingPage />} />
@@ -40,6 +40,7 @@ function App() {
             <Route path="/admin/zone" element={<AdminDashboard tab="zone" />} />
             <Route path="/admin/aisle" element={<AdminDashboard tab="aisle" />} />
             <Route path="/admin/bin" element={<AdminDashboard tab="bin" />} />
+            <Route path="/scan" element={<ScanItem tab="ScanItem"/>}/>
           </Route>
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="*" element={<Navigate to="/login" />} />
