@@ -22,7 +22,7 @@ const Sidebar = () => {
     { path: '/inventory', icon: <FiPackage size={20} />, label: 'Inventory', roles: ['MANAGER', 'OPERATOR'] },
     { path: '/receiving', icon: <FiTruck size={20} />, label: 'Shipment', roles: ['MANAGER', 'OPERATOR'] },
     { path: '/orders', icon: <FiShoppingCart size={20} />, label: 'Orders', roles: ['MANAGER', 'OPERATOR'] },
-    { path: '/Scan',icon:<FiSearch size={20}/>,label:'ScanItem',roles:['MANAGER','OPERATOR']},
+    { path: '/Scan',icon:<FiSearch size={20}/>,label:'Scan Item',roles:['OPERATOR']},
 ];
 
   return (
