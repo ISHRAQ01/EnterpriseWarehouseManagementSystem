@@ -2,14 +2,13 @@ package com.project.wms.service;
 
 import com.project.wms.model.Order;
 import com.project.wms.model.OrderStatus;
+import com.project.wms.model.Product;
 import com.project.wms.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import com.project.wms.model.Product;
-import com.project.wms.model.Bin;
 
 @Service
 public class OrderFulfillmentService {
@@ -23,7 +22,6 @@ public class OrderFulfillmentService {
     @Autowired
     private InventoryService inventoryService;
 
-    // GET ALL ORDERS with barcode
     public List<Order> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
         for (Order o : orders) {
@@ -32,7 +30,6 @@ public class OrderFulfillmentService {
         return orders;
     }
 
-    // Update order status with validation AND auto-update inventory
     @Transactional
     public Order updateOrderStatus(String orderNumber, OrderStatus newStatus) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
@@ -42,40 +39,31 @@ public class OrderFulfillmentService {
 
         order.setStatus(newStatus);
         order.setLastUpdated(LocalDateTime.now());
-        // AUTO-DEDUCT INVENTORY WHEN SHIPPED
+
+        // Auto-deduct inventory when SHIPPED
         if (newStatus == OrderStatus.SHIPPED) {
             String[] parts = order.getOrderNumber().split("\\|");
             if (parts.length >= 3) {
                 String sku = parts[1].replace("SKU:", "");
                 int qty = Integer.parseInt(parts[2].replace("QTY:", ""));
-
                 try {
-                    // Decrease inventory (negative quantity)
                     inventoryService.updateInventory(sku, -qty);
-                    System.out.println("Deducted " + qty + " from " + sku);
                 } catch (Exception e) {
-                    System.err.println("Failed to deduct inventory: " + e.getMessage());
+                    System.err.println("Warning: Could not deduct inventory - " + e.getMessage());
                 }
             }
         }
-        // AUTO-UPDATE INVENTORY WHEN RECEIVED
+
+        // Auto-update inventory when RECEIVED
         if (newStatus == OrderStatus.RECEIVED) {
             String[] parts = order.getOrderNumber().split("\\|");
             if (parts.length >= 3) {
                 String sku = parts[1].replace("SKU:", "");
-                int totalQty = Integer.parseInt(parts[2].replace("QTY:", ""));
-
+                int qty = Integer.parseInt(parts[2].replace("QTY:", ""));
                 try {
-                    // Find any existing product with this SKU to get its bin
-                    Product existingProduct = inventoryService.getProductBySku(sku);
-                    String binCode = existingProduct.getBinCode();
-
-                    // Use receiveProduct which properly merges by SKU+Bin
-                    inventoryService.receiveProduct(sku, existingProduct.getName(),
-                            "SHIP-" + System.currentTimeMillis(), binCode, totalQty);
-
+                    inventoryService.updateInventory(sku, qty);
                 } catch (Exception e) {
-                    System.err.println("Failed to update inventory: " + e.getMessage());
+                    System.err.println("Warning: Could not update inventory - " + e.getMessage());
                 }
             }
         }
@@ -86,30 +74,19 @@ public class OrderFulfillmentService {
     }
 
     private void validateStatusTransition(OrderStatus current, OrderStatus next) {
-        if (current == next) {
-            return;
-        }
-
+        if (current == next) return;
         switch (current) {
             case PENDING:
-                if (next == OrderStatus.PICKING || next == OrderStatus.PACKED || next == OrderStatus.PROCESSING) {
-                    return;
-                }
+                if (next == OrderStatus.PICKING || next == OrderStatus.PACKED || next == OrderStatus.PROCESSING) return;
                 break;
             case PROCESSING:
-                if (next == OrderStatus.RECEIVED) {
-                    return;
-                }
+                if (next == OrderStatus.RECEIVED) return;
                 break;
             case PICKING:
-                if (next == OrderStatus.PACKED) {
-                    return;
-                }
+                if (next == OrderStatus.PACKED) return;
                 break;
             case PACKED:
-                if (next == OrderStatus.SHIPPED) {
-                    return;
-                }
+                if (next == OrderStatus.SHIPPED) return;
                 break;
             case SHIPPED:
             case RECEIVED:
@@ -118,16 +95,36 @@ public class OrderFulfillmentService {
         throw new IllegalStateException("Cannot transition from " + current + " to " + next);
     }
 
-    // Create new order with barcode
     @Transactional
     public Order createOrder(String orderNumber) {
+        // Only check stock for OUTBOUND orders (ORD-), not INBOUND shipments (SHP-)
+        if (orderNumber.startsWith("ORD-")) {
+            String[] parts = orderNumber.split("\\|");
+            if (parts.length >= 3) {
+                String sku = parts[1].replace("SKU:", "");
+                int requestedQty = Integer.parseInt(parts[2].replace("QTY:", ""));
+                try {
+                    Product product = inventoryService.getProductBySku(sku);
+                    if (product.getQuantity() < requestedQty) {
+                        throw new RuntimeException(
+                                "Insufficient stock! Available: " + product.getQuantity() +
+                                        ", Requested: " + requestedQty
+                        );
+                    }
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException("Product not found: " + sku);
+                }
+            }
+        }
+
         Order order = new Order(orderNumber);
         order = orderRepository.save(order);
         order.setBarcodeImage(barcodeService.generateOrderBarcode(orderNumber));
         return order;
     }
 
-    // Get order by order number with barcode
     public Order getOrder(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderNumber));

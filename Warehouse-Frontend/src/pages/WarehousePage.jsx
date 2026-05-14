@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -298,7 +297,7 @@ const WarehousePage = () => {
       await fetchOccupancy(mapped);
     } catch { toast.error('Failed to load'); } finally { setLoading(false); }
   };
-
+  
   useEffect(() => { fetchWarehouses(); }, []);
 
   const totalBins = warehouses.reduce((s, w) => s + w.totalBins, 0);

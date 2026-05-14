@@ -20,7 +20,7 @@ public class Zone {
 
     private String zoneType;
 
-    @JsonIgnore          // ← ADD THIS LINE
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "warehouse_id")
     private Warehouse warehouse;

@@ -43,4 +43,29 @@ public class Product {
     public String getBinCode() {
         return bin != null ? bin.getBinCode() : null;
     }
+    public String getLocation() {
+        if (bin == null) return "Not assigned";
+
+        StringBuilder sb = new StringBuilder();
+
+        Aisle aisle = bin.getAisle();
+        Zone zone = aisle != null ? aisle.getZone() : null;
+        Warehouse warehouse = zone != null ? zone.getWarehouse() : null;
+
+        if (warehouse != null) {
+            sb.append(warehouse.getName());
+        }
+        if (zone != null) {
+            if (sb.length() > 0) sb.append(" → ");
+            sb.append(zone.getZoneCode());
+        }
+        if (aisle != null) {
+            if (sb.length() > 0) sb.append(" → ");
+            sb.append(aisle.getAisleCode());
+        }
+        if (sb.length() > 0) sb.append(" → ");
+        sb.append(bin.getBinCode());
+
+        return sb.toString();
+    }
 }

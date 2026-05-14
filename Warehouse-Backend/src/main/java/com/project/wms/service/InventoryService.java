@@ -43,33 +43,18 @@ public class InventoryService {
     public Product receiveProduct(String sku, String name, String barcode,
                                   String binCode, int quantity) {
         // Check if SKU already exists in THIS bin
-        Optional<Product> existing = productRepository.findBySkuAndBinCode(sku, binCode);
-        if (existing.isPresent()) {
-            Product p = existing.get();
-            Bin bin = p.getBin();
-            double capacity = bin.getCapacity() != null ? bin.getCapacity() : 100;
-            int newQty = p.getQuantity() + quantity;
-
-            // Cap at bin capacity
-            if (newQty > capacity) {
-                p.setQuantity((int) capacity);
-            } else {
-                p.setQuantity(newQty);
-            }
+        List<Product> existingList = productRepository.findBySkuAndBinCode(sku, binCode);
+        if (existingList != null && !existingList.isEmpty()) {
+            Product p = existingList.get(0);
+            p.setQuantity(p.getQuantity() + quantity);
             return productRepository.save(p);
         }
 
-        // Find bin - if bin doesn't exist, create it
+        // Find bin
         Bin bin = binRepository.findByBinCode(binCode)
-                .orElseGet(() -> {
-                    Bin newBin = new Bin(binCode, 100.0);
-                    return binRepository.save(newBin);
-                });
+                .orElseThrow(() -> new RuntimeException("Bin not found: " + binCode));
 
-        double capacity = bin.getCapacity() != null ? bin.getCapacity() : 100;
-        int cappedQty = Math.min(quantity, (int) capacity);
-
-        Product product = new Product(sku, name, cappedQty);
+        Product product = new Product(sku, name, quantity);
         product.setBarcode(barcode);
         product.setBin(bin);
         return productRepository.save(product);

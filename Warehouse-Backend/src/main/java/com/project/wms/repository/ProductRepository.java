@@ -5,8 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
-
+import java.util.*;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findBySku(String sku);
@@ -18,5 +17,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT COALESCE(SUM(p.quantity), 0) FROM Product p WHERE p.bin.id = :binId")
     int sumQuantityByBinId(@Param("binId") Long binId);
     @Query("SELECT p FROM Product p WHERE p.sku = :sku AND p.bin.binCode = :binCode")
-    Optional<Product> findBySkuAndBinCode(@Param("sku") String sku, @Param("binCode") String binCode);
+    List<Product> findBySkuAndBinCode(@Param("sku") String sku, @Param("binCode") String binCode);
 }

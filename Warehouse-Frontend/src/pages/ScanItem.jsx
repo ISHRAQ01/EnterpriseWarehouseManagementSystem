@@ -17,7 +17,7 @@ const ScanItem = () => {
       return () => scanner.clear().catch(() => {});
     }, 500);
     return () => clearTimeout(timeout);
-  }, []);
+  }, []); 
 
   const onScanSuccess = (decodedText) => {
     try {

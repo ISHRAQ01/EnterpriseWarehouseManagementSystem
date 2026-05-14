@@ -30,21 +30,29 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
-    // GET create order (for browser testing)
+    // GET create order
     @GetMapping("/create")
-    public ResponseEntity<Order> createOrderGet(@RequestParam String orderNumber) {
-        Order order = orderService.createOrder(orderNumber);
-        return ResponseEntity.ok(order);
+    public ResponseEntity<?> createOrderGet(@RequestParam String orderNumber) {
+        try {
+            Order order = orderService.createOrder(orderNumber);
+            return ResponseEntity.ok(order);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // POST create order
     @PostMapping("/create")
-    public ResponseEntity<Order> createOrderPost(@RequestParam String orderNumber) {
-        Order order = orderService.createOrder(orderNumber);
-        return ResponseEntity.ok(order);
+    public ResponseEntity<?> createOrderPost(@RequestParam String orderNumber) {
+        try {
+            Order order = orderService.createOrder(orderNumber);
+            return ResponseEntity.ok(order);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // GET update status (for browser testing)
+    // GET update status
     @GetMapping("/{orderNumber}/status")
     public ResponseEntity<Order> updateOrderStatusGet(
             @PathVariable String orderNumber,

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import {
   FiShoppingCart, FiPlus, FiX, FiPackage,
-  FiTruck, FiCheck, FiClock, FiEye, FiLoader, FiMapPin, FiDownload
+  FiTruck, FiCheck, FiClock, FiEye, FiLoader,FiDownload
 } from 'react-icons/fi';
 
 const statusConfig = {
@@ -108,7 +108,7 @@ const OrderDetailModal = ({ order, onClose }) => {
             <p className="text-sm font-semibold text-blue-700">Items</p>
             <div className="flex justify-between text-sm"><span className="text-gray-500">Product</span><span className="font-bold">{product ? product.name : 'N/A'}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-500">SKU</span><span className="font-bold">{info.sku}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-gray-500">Quantity</span><span className="font-bold text-lg">{info.qty} units</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Quantity</span><span className="font-bold">{info.qty} units</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-500">Price</span><span className="font-bold text-green-600">${info.price}</span></div>
             <div className="flex justify-between text-sm border-t pt-2"><span className="text-gray-700 font-semibold">Total</span><span className="font-bold text-lg text-blue-600">${(parseFloat(info.qty) * parseFloat(info.price)).toFixed(2)}</span></div>
           </div>
@@ -168,6 +168,11 @@ const OrdersPage = () => {
   useEffect(() => { fetchOrders(); }, []);
 
   const updateStatus = async (orderNumber, newStatus) => {
+    // Confirmation for Manager
+    if (user?.role === 'MANAGER') {
+      const confirm = window.confirm(`Are you sure you want to ${newStatus.toLowerCase()} this order?`);
+      if (!confirm) return;
+    }
     try {
       await api.get(`/orders/${orderNumber}/status`, { params: { newStatus } });
       toast.success(`Order ${newStatus}`);
@@ -175,7 +180,7 @@ const OrdersPage = () => {
     } catch (err) {
       toast.error('Failed to update order');
     }
-  };
+};
 
   const filteredOrders = filterStatus === 'ALL' ? orders : orders.filter(o => o.status === filterStatus);
   const counts = { ALL: orders.length, PENDING: orders.filter(o => o.status === 'PENDING').length, PICKING: orders.filter(o => o.status === 'PICKING').length, PACKED: orders.filter(o => o.status === 'PACKED').length, SHIPPED: orders.filter(o => o.status === 'SHIPPED').length };

@@ -26,9 +26,9 @@ const LoginPage = () => {
       const { token, role } = response.data;
       login(token, role);
       toast.success(`Welcome back, ${username}!`);
-      
+
       if (role === 'OPERATOR') {
-        navigate('/operator');
+        navigate('/dashboard');
       } else {
         navigate('/dashboard');
       }
