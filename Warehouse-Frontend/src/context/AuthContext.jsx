@@ -15,8 +15,14 @@ export const AuthProvider = ({ children }) => {
         const currentTime = Date.now() / 1000;
         if (decoded.exp > currentTime) {
           const jwtRole = decoded.role || '';
-          const mappedRole = jwtRole.includes('OPERATOR') ? 'OPERATOR' : 
-                             jwtRole.includes('MANAGER') ? 'MANAGER' : jwtRole;
+          
+          let mappedRole = jwtRole;
+          if (typeof jwtRole === 'string') {
+            const upperRole = jwtRole.toUpperCase();
+            if (upperRole.includes('OPERATOR')) mappedRole = 'OPERATOR';
+            else if (upperRole.includes('MANAGER') || upperRole.includes('ADMIN')) mappedRole = 'MANAGER';
+          }
+          
           setUser({ username: decoded.sub, role: mappedRole });
         } else {
           localStorage.removeItem('warehouseToken');
@@ -30,7 +36,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = (token, role) => {
     localStorage.setItem('warehouseToken', token);
-    setUser({ username: jwtDecode(token).sub, role: role });
+    const decoded = jwtDecode(token);
+    setUser({ username: decoded.sub, role: role });
   };
 
   const logout = () => {

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -42,35 +43,79 @@ public class OrderFulfillmentService {
 
         // Auto-deduct inventory when SHIPPED
         if (newStatus == OrderStatus.SHIPPED) {
-            String[] parts = order.getOrderNumber().split("\\|");
-            if (parts.length >= 3) {
-                String sku = parts[1].replace("SKU:", "");
-                int qty = Integer.parseInt(parts[2].replace("QTY:", ""));
-                try {
-                    inventoryService.updateInventory(sku, -qty);
-                } catch (Exception e) {
-                    System.err.println("Warning: Could not deduct inventory - " + e.getMessage());
-                }
-            }
+            deductAllItems(order.getOrderNumber(), -1); // negative = deduct
         }
 
-        // Auto-update inventory when RECEIVED
+        // Auto-update inventory when RECEIVED (for shipments)
         if (newStatus == OrderStatus.RECEIVED) {
-            String[] parts = order.getOrderNumber().split("\\|");
-            if (parts.length >= 3) {
-                String sku = parts[1].replace("SKU:", "");
-                int qty = Integer.parseInt(parts[2].replace("QTY:", ""));
-                try {
-                    inventoryService.updateInventory(sku, qty);
-                } catch (Exception e) {
-                    System.err.println("Warning: Could not update inventory - " + e.getMessage());
-                }
-            }
+            deductAllItems(order.getOrderNumber(), 1); // positive = add
         }
 
         order = orderRepository.save(order);
         order.setBarcodeImage(barcodeService.generateOrderBarcode(order.getOrderNumber()));
         return order;
+    }
+
+    /**
+     * Process all items in an order (main + extra)
+     * @param multiplier -1 for deduction (SHIPPED), +1 for addition (RECEIVED)
+     */
+    private void deductAllItems(String orderNumber, int multiplier) {
+        String[] parts = orderNumber.split("\\|");
+        List<OrderItem> allItems = new ArrayList<>();
+
+        // Parse main item
+        OrderItem mainItem = new OrderItem();
+        for (String part : parts) {
+            if (part.startsWith("SKU:")) mainItem.sku = part.replace("SKU:", "");
+            if (part.startsWith("QTY:")) mainItem.qty = part.replace("QTY:", "");
+            if (part.startsWith("WH:")) mainItem.warehouseId = part.replace("WH:", "");
+        }
+        if (mainItem.sku != null && mainItem.qty != null) {
+            allItems.add(mainItem);
+        }
+
+        // Parse EXTRA items
+        for (String part : parts) {
+            if (part.startsWith("EXTRA:")) {
+                // Format: EXTRA:SKU:M1:QTY:32:PRICE:2:WH:2
+                String extraStr = part.replace("EXTRA:", "");
+                String[] extraParts = extraStr.split(":");
+                OrderItem extraItem = new OrderItem();
+                for (int i = 0; i < extraParts.length; i++) {
+                    if (extraParts[i].equals("SKU") && i + 1 < extraParts.length) extraItem.sku = extraParts[i + 1];
+                    if (extraParts[i].equals("QTY") && i + 1 < extraParts.length) extraItem.qty = extraParts[i + 1];
+                    if (extraParts[i].equals("WH") && i + 1 < extraParts.length) extraItem.warehouseId = extraParts[i + 1];
+                }
+                if (extraItem.sku != null && extraItem.qty != null) {
+                    allItems.add(extraItem);
+                }
+            }
+        }
+
+        // Process all items
+        for (OrderItem item : allItems) {
+            try {
+                int qty = Integer.parseInt(item.qty);
+                Long warehouseId = null;
+                if (item.warehouseId != null && !item.warehouseId.isEmpty()) {
+                    try {
+                        warehouseId = Long.parseLong(item.warehouseId);
+                    } catch (NumberFormatException ignored) {}
+                }
+                int quantityChange = qty * multiplier; // negative = deduct, positive = add
+                inventoryService.updateInventoryByWarehouse(item.sku, quantityChange, warehouseId);
+            } catch (Exception e) {
+                System.err.println("Warning: Could not process item " + item.sku + " - " + e.getMessage());
+            }
+        }
+    }
+
+    // Inner class for parsing order items
+    private static class OrderItem {
+        String sku;
+        String qty;
+        String warehouseId;
     }
 
     private void validateStatusTransition(OrderStatus current, OrderStatus next) {
@@ -97,25 +142,56 @@ public class OrderFulfillmentService {
 
     @Transactional
     public Order createOrder(String orderNumber) {
-        // Only check stock for OUTBOUND orders (ORD-), not INBOUND shipments (SHP-)
         if (orderNumber.startsWith("ORD-")) {
             String[] parts = orderNumber.split("\\|");
-            if (parts.length >= 3) {
-                String sku = parts[1].replace("SKU:", "");
-                int requestedQty = Integer.parseInt(parts[2].replace("QTY:", ""));
+
+            // ✅ Validate ALL items (main + extra)
+            List<String> errors = new ArrayList<>();
+
+            // Check main item
+            String mainSku = null;
+            int mainQty = 0;
+            for (String part : parts) {
+                if (part.startsWith("SKU:")) mainSku = part.replace("SKU:", "");
+                if (part.startsWith("QTY:")) mainQty = Integer.parseInt(part.replace("QTY:", ""));
+            }
+            if (mainSku != null) {
                 try {
-                    Product product = inventoryService.getProductBySku(sku);
-                    if (product.getQuantity() < requestedQty) {
-                        throw new RuntimeException(
-                                "Insufficient stock! Available: " + product.getQuantity() +
-                                        ", Requested: " + requestedQty
-                        );
+                    Product product = inventoryService.getProductBySku(mainSku);
+                    if (product.getQuantity() < mainQty) {
+                        errors.add(mainSku + ": Insufficient stock (Available: " + product.getQuantity() + ", Requested: " + mainQty + ")");
                     }
-                } catch (RuntimeException e) {
-                    throw e;
                 } catch (Exception e) {
-                    throw new RuntimeException("Product not found: " + sku);
+                    errors.add("Product not found: " + mainSku);
                 }
+            }
+
+            // Check EXTRA items
+            for (String part : parts) {
+                if (part.startsWith("EXTRA:")) {
+                    String extraStr = part.replace("EXTRA:", "");
+                    String[] extraParts = extraStr.split(":");
+                    String extraSku = null;
+                    int extraQty = 0;
+                    for (int i = 0; i < extraParts.length; i++) {
+                        if (extraParts[i].equals("SKU") && i + 1 < extraParts.length) extraSku = extraParts[i + 1];
+                        if (extraParts[i].equals("QTY") && i + 1 < extraParts.length) extraQty = Integer.parseInt(extraParts[i + 1]);
+                    }
+                    if (extraSku != null) {
+                        try {
+                            Product product = inventoryService.getProductBySku(extraSku);
+                            if (product.getQuantity() < extraQty) {
+                                errors.add(extraSku + ": Insufficient stock (Available: " + product.getQuantity() + ", Requested: " + extraQty + ")");
+                            }
+                        } catch (Exception e) {
+                            errors.add("Product not found: " + extraSku);
+                        }
+                    }
+                }
+            }
+
+            if (!errors.isEmpty()) {
+                throw new RuntimeException(String.join("; ", errors));
             }
         }
 
