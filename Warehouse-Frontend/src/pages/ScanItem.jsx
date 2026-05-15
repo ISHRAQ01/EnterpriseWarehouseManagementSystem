@@ -24,7 +24,7 @@ const ScanItem = () => {
         rememberLastUsedCamera: true,
       }, false);
       scanner.render(onScanSuccess, onScanError);
-      return () => scanner.clear().catch(() => {});
+      return () => scanner.clear().catch(() => { });
     }, 500);
     return () => clearTimeout(timeout);
   }, []);
@@ -47,12 +47,12 @@ const ScanItem = () => {
         handleScan(parsed.sku);
         return;
       }
-    } catch {}
+    } catch { }
     setScanInput(decodedText);
     handleScan(decodedText);
   };
 
-  const onScanError = () => {};
+  const onScanError = () => { };
 
   const handleScan = async (value) => {
     const searchTerm = value || scanInput;
@@ -115,7 +115,7 @@ const ScanItem = () => {
         );
         return { ...item, name: match?.name || item.sku, warehouseName: match?.warehouseName || '' };
       });
-    } catch {}
+    } catch { }
 
     const total = allItems.reduce((sum, item) =>
       sum + (parseFloat(item.qty) || 0) * (parseFloat(item.price) || 0), 0
@@ -156,7 +156,7 @@ const ScanItem = () => {
 
     const allItems = [mainItem, ...extraItems];
     let totalQty = 0;
-    
+
     try {
       const res = await api.get('/inventory/with-warehouse');
       for (let item of allItems) {
@@ -169,7 +169,7 @@ const ScanItem = () => {
         item.binCode = match?.binCode || '';
         totalQty += parseInt(item.qty) || 0;
       }
-    } catch {}
+    } catch { }
 
     setShipmentData({
       shipmentNo: parts[0],
@@ -279,14 +279,12 @@ const ScanItem = () => {
               {products.map((product, i) => {
                 const isLowStock = product.quantity < 30;
                 return (
-                  <div key={i} className={`border-2 rounded-2xl p-5 transition-all hover:shadow-md ${
-                    isLowStock ? 'border-amber-200 bg-amber-50/50' : 'border-green-200 bg-green-50/50'
-                  }`}>
+                  <div key={i} className={`border-2 rounded-2xl p-5 transition-all hover:shadow-md ${isLowStock ? 'border-amber-200 bg-amber-50/50' : 'border-green-200 bg-green-50/50'
+                    }`}>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          isLowStock ? 'bg-amber-100' : 'bg-green-100'
-                        }`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLowStock ? 'bg-amber-100' : 'bg-green-100'
+                          }`}>
                           <FiBox size={20} className={isLowStock ? 'text-amber-600' : 'text-green-600'} />
                         </div>
                         <div>
@@ -294,9 +292,8 @@ const ScanItem = () => {
                           <code className="text-xs bg-white px-2 py-0.5 rounded text-gray-500 font-mono">{product.sku}</code>
                         </div>
                       </div>
-                      <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${
-                        isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
-                      }`}>
+                      <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
+                        }`}>
                         {product.quantity} units
                       </span>
                     </div>
@@ -395,53 +392,60 @@ const ScanItem = () => {
           {resultType === 'shipment' && shipmentData && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden animate-fade-in">
               <div className="bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-5 text-white">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                    <FiTruck size={24} />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                      <FiTruck size={24} />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold">{shipmentData.shipmentNo}</h2>
+                      <p className="text-violet-100 text-sm">{shipmentData.items.length} product{shipmentData.items.length > 1 ? 's' : ''}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold">{shipmentData.shipmentNo}</h2>
-                    <p className="text-violet-100 text-sm">Shipment Details</p>
-                  </div>
+                  <span className="text-2xl font-black">{shipmentData.totalQty} units</span>
                 </div>
               </div>
               <div className="p-5 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Supplier</p>
-                    <p className="text-sm font-bold text-gray-800">{shipmentData.supplier}</p>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Quantity</p>
-                    <p className="text-2xl font-black text-gray-800">{shipmentData.qty} <span className="text-sm font-normal text-gray-500">units</span></p>
-                  </div>
-                </div>
-
                 <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Product</p>
-                  <p className="text-lg font-bold text-gray-800">{shipmentData.productName}</p>
-                  <code className="text-sm text-gray-500 font-mono">{shipmentData.sku}</code>
+                  <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Supplier</p>
+                  <p className="text-lg font-bold text-gray-800">{shipmentData.supplier}</p>
                 </div>
 
-                {shipmentData.warehouseName && (
-                  <div className="bg-violet-50 rounded-xl p-4">
-                    <p className="text-xs text-violet-400 uppercase tracking-wider mb-1">Warehouse</p>
-                    <p className="text-sm font-bold text-violet-700">{shipmentData.warehouseName}</p>
+                {/* Show ALL items */}
+                <div className="border-t pt-4">
+                  <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <FiPackage size={14} /> Products ({shipmentData.items.length})
+                  </p>
+                  <div className="space-y-2">
+                    {shipmentData.items.map((item, i) => (
+                      <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl p-3 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center text-xs font-bold text-violet-600">
+                            {i + 1}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-800">{item.name}</p>
+                            <p className="text-xs text-gray-500">{item.sku} • {item.warehouseName}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-800">{item.qty} units</p>
+                          {item.location && (
+                            <p className="text-xs text-purple-500 mt-0.5 flex items-center gap-1">
+                              <FiMapPin size={10} /> {item.binCode}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
 
-                {shipmentData.location && (
-                  <div className="bg-purple-50 rounded-xl p-4 flex items-start gap-3">
-                    <div className="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center">
-                      <FiMapPin size={16} className="text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-purple-400 uppercase tracking-wider mb-0.5">Location</p>
-                      <p className="text-sm font-semibold text-purple-800">{shipmentData.location}</p>
-                      {shipmentData.binCode && <p className="text-xs text-purple-500 mt-1">Bin: {shipmentData.binCode}</p>}
-                    </div>
-                  </div>
-                )}
+                {/* Total */}
+                <div className="bg-violet-50 rounded-xl p-4 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-violet-700">Total Quantity</span>
+                  <span className="text-xl font-black text-violet-700">{shipmentData.totalQty} units</span>
+                </div>
 
                 <button onClick={resetAll} className="w-full flex items-center justify-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors py-2">
                   <FiRefreshCw size={14} /> Scan Another Code
