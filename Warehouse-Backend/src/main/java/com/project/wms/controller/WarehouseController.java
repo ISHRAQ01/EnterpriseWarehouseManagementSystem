@@ -159,10 +159,7 @@ public class WarehouseController {
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
         long usedBins = productRepository.countDistinctBinByWarehouseId(id);
-        long totalBins = wh.getZones().stream()
-                .flatMap(z -> z.getAisles().stream())
-                .flatMap(a -> a.getBins().stream())
-                .count();
+        long totalBins = binRepository.countByWarehouseId(id); //
 
         Map<String, Object> result = new HashMap<>();
         result.put("usedBins", usedBins);

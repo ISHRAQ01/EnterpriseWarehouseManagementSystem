@@ -14,4 +14,7 @@ public interface BinRepository extends JpaRepository<Bin, Long> {
 
     @Query("SELECT b FROM Bin b WHERE b.binCode = :binCode AND b.aisle.id = :aisleId")
     Optional<Bin> findByBinCodeAndAisleId(@Param("binCode") String binCode, @Param("aisleId") Long aisleId);
+
+    @Query("SELECT COUNT(b) FROM Bin b JOIN b.aisle a JOIN a.zone z WHERE z.warehouse.id = :warehouseId")
+    long countByWarehouseId(@Param("warehouseId") Long warehouseId);
 }
