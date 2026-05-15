@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd Warehouse-Frontend && npm install && npm run build",
-  "outputDirectory": "Warehouse-Frontend/build",
-  "installCommand": "cd Warehouse-Frontend && npm install"
-}
